@@ -38,7 +38,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/test",
                                 "/api/auth/register",
-                                "/api/auth/login"
+                                "/api/auth/login",
+                                "/api/v1/**"
                         ).permitAll()
 
                         // Technician-only Service Record operations

@@ -30,10 +30,10 @@ public class JwtConfig {
 
     @Bean
     public JwtEncoder jwtEncoder(SecretKey secretKey) {
-        return NimbusJwtEncoder
-                .withSecretKey(secretKey)
-                .algorithm(MacAlgorithm.HS256)
-                .build();
+        com.nimbusds.jose.jwk.JWK jwk = new com.nimbusds.jose.jwk.OctetSequenceKey.Builder(secretKey).build();
+        com.nimbusds.jose.jwk.source.JWKSource<com.nimbusds.jose.proc.SecurityContext> jwks = 
+                new com.nimbusds.jose.jwk.source.ImmutableJWKSet<>(new com.nimbusds.jose.jwk.JWKSet(jwk));
+        return new NimbusJwtEncoder(jwks);
     }
 
     @Bean
