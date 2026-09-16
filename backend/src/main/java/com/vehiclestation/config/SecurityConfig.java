@@ -27,67 +27,60 @@ public class SecurityConfig {
     ) throws Exception {
 
         http
-                // Allow requests from the React frontend
-                .cors(cors ->
-                        cors.configurationSource(corsConfigurationSource())
-                )
-
-                // JWT REST API does not use browser sessions/CSRF tokens
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
-
-                // Do not create server-side login sessions
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(
-                                SessionCreationPolicy.STATELESS
-                        )
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-
-                // Public and protected endpoint rules
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // Allow CORS preflight requests
-                        .requestMatchers(HttpMethod.OPTIONS, "/**")
-                        .permitAll()
-
-                        // Public endpoints
                         .requestMatchers(
                                 "/api/test",
                                 "/api/auth/register",
                                 "/api/auth/login"
-                        )
-                        .permitAll()
+                        ).permitAll()
 
-                        // All other endpoints require a valid JWT
-                        .anyRequest()
-                        .authenticated()
+                        // Technician-only Service Record operations
+                        .requestMatchers(HttpMethod.GET, "/api/service-records/my-jobs/**")
+                        .hasRole("TECHNICIAN")
+                        .requestMatchers(HttpMethod.PATCH,
+                                "/api/service-records/*/start",
+                                "/api/service-records/*/progress",
+                                "/api/service-records/*/complete"
+                        ).hasRole("TECHNICIAN")
+                        .requestMatchers(HttpMethod.POST, "/api/service-records/*/parts")
+                        .hasRole("TECHNICIAN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/service-records/*/parts/*")
+                        .hasRole("TECHNICIAN")
+
+                        // Staff/Admin Service Record CRUD + assignment
+                        .requestMatchers(HttpMethod.POST, "/api/service-records")
+                        .hasAnyRole("STAFF", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/service-records/*/assign")
+                        .hasAnyRole("STAFF", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/service-records/*")
+                        .hasAnyRole("STAFF", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/service-records/*")
+                        .hasAnyRole("STAFF", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/service-records/**")
+                        .hasAnyRole("STAFF", "ADMIN")
+
+                        .anyRequest().authenticated()
                 )
-
-                // Validate Bearer JWT tokens
                 .oauth2ResourceServer(oauth2 ->
                         oauth2.jwt(jwt ->
-                                jwt.jwtAuthenticationConverter(
-                                        jwtAuthenticationConverter
-                                )
+                                jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)
                         )
                 )
-
-                // Disable default login methods
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable);
 
         return http.build();
     }
 
-    /**
-     * Converts the "roles" claim inside the JWT into Spring authorities.
-     *
-     * Example:
-     * CUSTOMER becomes ROLE_CUSTOMER
-     * ADMIN becomes ROLE_ADMIN
-     */
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
-
         JwtGrantedAuthoritiesConverter authoritiesConverter =
                 new JwtGrantedAuthoritiesConverter();
 
@@ -97,63 +90,28 @@ public class SecurityConfig {
         JwtAuthenticationConverter authenticationConverter =
                 new JwtAuthenticationConverter();
 
-        authenticationConverter.setJwtGrantedAuthoritiesConverter(
-                authoritiesConverter
-        );
-
+        authenticationConverter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
         return authenticationConverter;
     }
 
-    /**
-     * Used to hash and verify user passwords.
-     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     * Allows the React frontend at localhost:5173
-     * to communicate with the Spring Boot backend.
-     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-
         CorsConfiguration configuration = new CorsConfiguration();
-
-        configuration.setAllowedOrigins(
-                List.of("http://localhost:5173")
-        );
-
-        configuration.setAllowedMethods(
-                List.of(
-                        "GET",
-                        "POST",
-                        "PUT",
-                        "PATCH",
-                        "DELETE",
-                        "OPTIONS"
-                )
-        );
-
-        configuration.setAllowedHeaders(
-                List.of("*")
-        );
-
-        configuration.setExposedHeaders(
-                List.of("Authorization")
-        );
-
+        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedMethods(List.of(
+                "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
+        ));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setExposedHeaders(List.of("Authorization"));
         configuration.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
-
-        source.registerCorsConfiguration(
-                "/**",
-                configuration
-        );
-
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 }
