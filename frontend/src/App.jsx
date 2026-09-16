@@ -1,54 +1,122 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import ProtectedRoute from "./components/ProtectedRoute";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
-import DashboardPage from "./pages/DashboardPage";
-import UnauthorizedPage from "./pages/UnauthorizedPage";
-import ServiceRecordList from "./serviceRecords/ServiceRecordList";
-import ServiceRecordForm from "./serviceRecords/ServiceRecordForm";
-import ServiceRecordDetails from "./serviceRecords/ServiceRecordDetails";
-import TechnicianJobs from "./serviceRecords/TechnicianJobs";
-import TechnicianJobDetails from "./serviceRecords/TechnicianJobDetails";
+import React, { useState, useEffect } from 'react';
+import Navbar from './components/common/Navbar';
+import Sidebar from './components/common/Sidebar';
+import InventoryDashboard from './pages/InventoryDashboard';
+import FuelStockPage from './pages/FuelStockPage';
+import SparePartsPage from './pages/SparePartsPage';
+import dashboardApi from './api/dashboardApi';
 
-function App() {
+export default function App() {
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeRole, setActiveRole] = useState('STAFF');
+
+  const [lowStockFuelCount, setLowStockFuelCount] = useState(0);
+  const [lowStockPartsCount, setLowStockPartsCount] = useState(0);
+  const [fuelLowStockFilter, setFuelLowStockFilter] = useState(false);
+  const [partsLowStockFilter, setPartsLowStockFilter] = useState(false);
+
+  const fetchBadgeCounts = async () => {
+    try {
+      const res = await dashboardApi.getSummary();
+      if (res && res.data) {
+        setLowStockFuelCount(res.data.lowStockFuelCount || 0);
+        setLowStockPartsCount(res.data.lowStockSparePartsCount || 0);
+      }
+    } catch (err) {
+      console.warn('Backend telemetry polling notice:', err.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchBadgeCounts();
+    const interval = setInterval(fetchBadgeCounts, 15000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleNavigateToFuel = (filterLowStock = false) => {
+    setFuelLowStockFilter(filterLowStock);
+    setActiveTab('fuel');
+  };
+
+  const handleNavigateToSpareParts = (filterLowStock = false) => {
+    setPartsLowStockFilter(filterLowStock);
+    setActiveTab('spareparts');
+  };
+
   return (
-    <BrowserRouter>
-      <Navbar />
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/unauthorized" element={<UnauthorizedPage />} />
+    <div className="d-flex flex-column min-vh-100" style={{ backgroundColor: '#081220' }}>
+      <Navbar
+        activeRole={activeRole}
+        setActiveRole={setActiveRole}
+      />
 
-        <Route path="/dashboard" element={
-          <ProtectedRoute><DashboardPage /></ProtectedRoute>
-        } />
+      <div className="container-fluid flex-grow-1 p-0">
+        <div className="row g-0">
+          <div className="col-12 col-md-3 col-lg-2 d-none d-md-block">
+            <Sidebar
+              activeTab={activeTab}
+              setActiveTab={(tab) => {
+                if (tab === 'fuel') setFuelLowStockFilter(false);
+                if (tab === 'spareparts') setPartsLowStockFilter(false);
+                setActiveTab(tab);
+              }}
+              lowStockFuelCount={lowStockFuelCount}
+              lowStockPartsCount={lowStockPartsCount}
+            />
+          </div>
 
-        <Route path="/service-records" element={
-          <ProtectedRoute roles={["STAFF", "ADMIN"]}><ServiceRecordList /></ProtectedRoute>
-        } />
-        <Route path="/service-records/new" element={
-          <ProtectedRoute roles={["STAFF", "ADMIN"]}><ServiceRecordForm /></ProtectedRoute>
-        } />
-        <Route path="/service-records/:id/edit" element={
-          <ProtectedRoute roles={["STAFF", "ADMIN"]}><ServiceRecordForm /></ProtectedRoute>
-        } />
-        <Route path="/service-records/:id" element={
-          <ProtectedRoute roles={["STAFF", "ADMIN"]}><ServiceRecordDetails /></ProtectedRoute>
-        } />
+          {/* Mobile Tab Navigation */}
+          <div
+            className="col-12 d-md-none p-2 border-bottom shadow-sm"
+            style={{ backgroundColor: '#0b132b', borderColor: '#1e293b' }}
+          >
+            <div className="btn-group w-100" role="group">
+              <button
+                type="button"
+                className={`btn btn-sm ${activeTab === 'dashboard' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                onClick={() => setActiveTab('dashboard')}
+              >
+                Dashboard
+              </button>
+              <button
+                type="button"
+                className={`btn btn-sm ${activeTab === 'fuel' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                onClick={() => {
+                  setFuelLowStockFilter(false);
+                  setActiveTab('fuel');
+                }}
+              >
+                Fuel Stocks
+              </button>
+              <button
+                type="button"
+                className={`btn btn-sm ${activeTab === 'spareparts' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                onClick={() => {
+                  setPartsLowStockFilter(false);
+                  setActiveTab('spareparts');
+                }}
+              >
+                Spare Parts
+              </button>
+            </div>
+          </div>
 
-        <Route path="/technician/jobs" element={
-          <ProtectedRoute roles={["TECHNICIAN"]}><TechnicianJobs /></ProtectedRoute>
-        } />
-        <Route path="/technician/jobs/:id" element={
-          <ProtectedRoute roles={["TECHNICIAN"]}><TechnicianJobDetails /></ProtectedRoute>
-        } />
-
-        <Route path="/" element={<Navigate to={localStorage.getItem("accessToken") ? "/dashboard" : "/login"} replace />} />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
-      </Routes>
-    </BrowserRouter>
+          <div className="col-12 col-md-9 col-lg-10">
+            {activeTab === 'dashboard' && (
+              <InventoryDashboard
+                onNavigateToFuel={handleNavigateToFuel}
+                onNavigateToSpareParts={handleNavigateToSpareParts}
+              />
+            )}
+            {activeTab === 'fuel' && (
+              <FuelStockPage defaultLowStock={fuelLowStockFilter} />
+            )}
+            {activeTab === 'spareparts' && (
+              <SparePartsPage defaultLowStock={partsLowStockFilter} />
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
-
-export default App;
