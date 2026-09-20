@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Fuel Sales</title>
+</head>
+
+<body>
+
+<h1>Fuel Sales</h1>
+
+<table border="1">
+
+    <thead>
+    <tr>
+        <th>Invoice</th>
+        <th>Fuel Type</th>
+        <th>Quantity</th>
+        <th>Unit Price</th>
+        <th>Total Amount</th>
+        <th>Vehicle</th>
+        <th>Customer</th>
+        <th>Date</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+
+    <tbody>
+
+    <tr th:each="sale : ${sales}">
+
+        <td th:text="${sale.invoiceNumber}"></td>
+
+        <td th:text="${sale.inventoryItem.itemName}"></td>
+
+        <td th:text="${sale.quantity}"></td>
+
+        <td th:text="${sale.unitPrice}"></td>
+
+        <td th:text="${sale.totalAmount}"></td>
+
+        <td th:text="${sale.vehicleNumber}"></td>
+
+        <td th:text="${sale.customerName}"></td>
+
+        <td th:text="${sale.saleDateTime}"></td>
+
+        <td>
+            <a th:href="@{/sales/{id}(id=${sale.id})}">
+                View
+            </a>
+        </td>
+
+    </tr>
+
+    </tbody>
+
+</table>
+
+</body>
+</html>

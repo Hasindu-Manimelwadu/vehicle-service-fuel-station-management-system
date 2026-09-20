@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -68,6 +69,22 @@ public class FuelSaleService {
         inventoryItemRepository.save(inventoryItem);
 
         return fuelSaleRepository.save(fuelSale);
+    }
+
+    public List<FuelSale> getAllSales() {
+        return fuelSaleRepository.findAll();
+    }
+
+    public FuelSale getSaleById(Long id) {
+        return fuelSaleRepository.findById(id)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Fuel sale not found"));
+    }
+
+    public FuelSale getSaleByInvoiceNumber(String invoiceNumber) {
+        return fuelSaleRepository.findByInvoiceNumber(invoiceNumber)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Invoice not found"));
     }
 
     private String generateInvoiceNumber() {
