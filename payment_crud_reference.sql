@@ -1,0 +1,13 @@
+-- Reference only. Adapt names/types to the team's existing schema.
+-- Payment CRUD requires a payment identifier linked to FuelSale.
+-- Do not run blindly if the main project already has these tables.
+
+-- Example:
+-- CREATE TABLE payment (
+--   id BIGINT PRIMARY KEY AUTO_INCREMENT,
+--   sale_id BIGINT NOT NULL,
+--   amount DECIMAL(12,2) NOT NULL,
+--   method VARCHAR(30) NOT NULL,
+--   status VARCHAR(20) NOT NULL,
+--   paid_at TIMESTAMP
+-- );

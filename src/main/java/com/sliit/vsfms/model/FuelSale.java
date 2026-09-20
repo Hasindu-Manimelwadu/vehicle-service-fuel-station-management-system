@@ -1,132 +1,34 @@
 package com.sliit.vsfms.model;
 
 import jakarta.persistence.*;
-
+import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "fuel_sales")
 public class FuelSale {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(unique = true, nullable = false)
-    private String invoiceNumber;
-
-    @ManyToOne
-    @JoinColumn(name = "inventory_item_id", nullable = false)
-    private InventoryItem inventoryItem;
-
-    @Column(nullable = false)
-    private Double quantity;
-
-    @Column(nullable = false)
-    private BigDecimal unitPrice;
-
-    @Column(nullable = false)
-    private BigDecimal totalAmount;
-
-    @Column(nullable = false)
-    private LocalDateTime saleDateTime;
-
-    private String vehicleNumber;
-
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
+    @Column(nullable = false, unique = true) private String invoiceNumber;
+    @NotNull @ManyToOne(fetch = FetchType.EAGER) @JoinColumn(name = "fuel_item_id", nullable = false) private InventoryItem fuelItem;
+    @NotNull @DecimalMin("0.01") private BigDecimal quantity;
+    @DecimalMin("0.00") private BigDecimal unitPrice;
+    @DecimalMin("0.00") private BigDecimal totalAmount;
     private String customerName;
-
-    public FuelSale() {
-    }
-
-    public FuelSale(String invoiceNumber,
-                    InventoryItem inventoryItem,
-                    Double quantity,
-                    BigDecimal unitPrice,
-                    BigDecimal totalAmount,
-                    LocalDateTime saleDateTime,
-                    String vehicleNumber,
-                    String customerName) {
-
-        this.invoiceNumber = invoiceNumber;
-        this.inventoryItem = inventoryItem;
-        this.quantity = quantity;
-        this.unitPrice = unitPrice;
-        this.totalAmount = totalAmount;
-        this.saleDateTime = saleDateTime;
-        this.vehicleNumber = vehicleNumber;
-        this.customerName = customerName;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getInvoiceNumber() {
-        return invoiceNumber;
-    }
-
-    public void setInvoiceNumber(String invoiceNumber) {
-        this.invoiceNumber = invoiceNumber;
-    }
-
-    public InventoryItem getInventoryItem() {
-        return inventoryItem;
-    }
-
-    public void setInventoryItem(InventoryItem inventoryItem) {
-        this.inventoryItem = inventoryItem;
-    }
-
-    public Double getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(Double quantity) {
-        this.quantity = quantity;
-    }
-
-    public BigDecimal getUnitPrice() {
-        return unitPrice;
-    }
-
-    public void setUnitPrice(BigDecimal unitPrice) {
-        this.unitPrice = unitPrice;
-    }
-
-    public BigDecimal getTotalAmount() {
-        return totalAmount;
-    }
-
-    public void setTotalAmount(BigDecimal totalAmount) {
-        this.totalAmount = totalAmount;
-    }
-
-    public LocalDateTime getSaleDateTime() {
-        return saleDateTime;
-    }
-
-    public void setSaleDateTime(LocalDateTime saleDateTime) {
-        this.saleDateTime = saleDateTime;
-    }
-
-    public String getVehicleNumber() {
-        return vehicleNumber;
-    }
-
-    public void setVehicleNumber(String vehicleNumber) {
-        this.vehicleNumber = vehicleNumber;
-    }
-
-    public String getCustomerName() {
-        return customerName;
-    }
-
-    public void setCustomerName(String customerName) {
-        this.customerName = customerName;
-    }
+    private String vehicleNumber;
+    @NotNull @Enumerated(EnumType.STRING) private PaymentMethod paymentMethod = PaymentMethod.CASH;
+    @NotNull @Enumerated(EnumType.STRING) private PaymentStatus paymentStatus = PaymentStatus.PAID;
+    private LocalDateTime saleDateTime;
+    @PrePersist void prePersist(){ if(saleDateTime == null) saleDateTime = LocalDateTime.now(); }
+    public Long getId(){return id;} public void setId(Long v){id=v;}
+    public String getInvoiceNumber(){return invoiceNumber;} public void setInvoiceNumber(String v){invoiceNumber=v;}
+    public InventoryItem getFuelItem(){return fuelItem;} public void setFuelItem(InventoryItem v){fuelItem=v;}
+    public BigDecimal getQuantity(){return quantity;} public void setQuantity(BigDecimal v){quantity=v;}
+    public BigDecimal getUnitPrice(){return unitPrice;} public void setUnitPrice(BigDecimal v){unitPrice=v;}
+    public BigDecimal getTotalAmount(){return totalAmount;} public void setTotalAmount(BigDecimal v){totalAmount=v;}
+    public String getCustomerName(){return customerName;} public void setCustomerName(String v){customerName=v;}
+    public String getVehicleNumber(){return vehicleNumber;} public void setVehicleNumber(String v){vehicleNumber=v;}
+    public PaymentMethod getPaymentMethod(){return paymentMethod;} public void setPaymentMethod(PaymentMethod v){paymentMethod=v;}
+    public PaymentStatus getPaymentStatus(){return paymentStatus;} public void setPaymentStatus(PaymentStatus v){paymentStatus=v;}
+    public LocalDateTime getSaleDateTime(){return saleDateTime;} public void setSaleDateTime(LocalDateTime v){saleDateTime=v;}
 }
