@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staff Management — Admin</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <aside class="side-rail">
+    <div class="rail-mark">
+      <span class="rail-mark-bolt">&#9881;</span>
+      <div>
+        <p class="rail-mark-title">Staff Module</p>
+        <p class="rail-mark-sub">VSFSMS Admin</p>
+      </div>
+    </div>
+
+    <nav class="rail-nav">
+      <button class="rail-btn is-active" data-panel="staff">
+        <span class="rail-btn-num">01</span> Staff
+      </button>
+      <button class="rail-btn" data-panel="shifts">
+        <span class="rail-btn-num">02</span> Work Shifts
+      </button>
+      <button class="rail-btn" data-panel="attendance">
+        <span class="rail-btn-num">03</span> Attendance
+      </button>
+      <button class="rail-btn" data-panel="salary">
+        <span class="rail-btn-num">04</span> Salary
+      </button>
+    </nav>
+
+    <div class="rail-footer">
+      <label for="apiBase">API base URL</label>
+      <input id="apiBase" type="text" value="http://localhost:8080/api" spellcheck="false">
+      <p id="connState" class="conn-state">checking connection…</p>
+    </div>
+  </aside>
+
+  <main class="workspace">
+
+    <!-- ================= STAFF ================= -->
+    <section class="panel is-active" id="panel-staff">
+      <header class="panel-head">
+        <div>
+          <h1>Staff</h1>
+          <p class="panel-sub">Employee records — designation, contact, salary base, status.</p>
+        </div>
+        <button class="btn-primary" data-open-form="staff">+ Add staff</button>
+      </header>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Staff ID</th><th>Employee No</th><th>Name</th><th>Designation</th>
+              <th>Phone</th><th>Email</th><th>Joined</th><th>Status</th><th>Basic Salary</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="staff-tbody">
+            <tr class="empty-row"><td colspan="10">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ================= WORK SHIFTS ================= -->
+    <section class="panel" id="panel-shifts">
+      <header class="panel-head">
+        <div>
+          <h1>Work Shifts</h1>
+          <p class="panel-sub">Scheduled shift dates and times per staff member.</p>
+        </div>
+        <button class="btn-primary" data-open-form="shift">+ Add shift</button>
+      </header>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Shift ID</th><th>Staff ID</th><th>Date</th><th>Start</th><th>End</th><th>Status</th><th></th></tr>
+          </thead>
+          <tbody id="shift-tbody">
+            <tr class="empty-row"><td colspan="7">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ================= ATTENDANCE ================= -->
+    <section class="panel" id="panel-attendance">
+      <header class="panel-head">
+        <div>
+          <h1>Attendance</h1>
+          <p class="panel-sub">Daily check-in / check-out records and working hours.</p>
+        </div>
+        <button class="btn-primary" data-open-form="attendance">+ Add record</button>
+      </header>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Attendance ID</th><th>Staff ID</th><th>Date</th><th>Check In</th><th>Check Out</th><th>Hours</th><th>Status</th><th></th></tr>
+          </thead>
+          <tbody id="attendance-tbody">
+            <tr class="empty-row"><td colspan="8">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ================= SALARY ================= -->
+    <section class="panel" id="panel-salary">
+      <header class="panel-head">
+        <div>
+          <h1>Salary</h1>
+          <p class="panel-sub">Monthly pay: basic, overtime, deductions — net calculated automatically.</p>
+        </div>
+        <button class="btn-primary" data-open-form="salary">+ Add salary record</button>
+      </header>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Salary ID</th><th>Staff ID</th><th>Month</th><th>Basic</th><th>Overtime</th><th>Deductions</th><th>Net</th><th>Status</th><th></th></tr>
+          </thead>
+          <tbody id="salary-tbody">
+            <tr class="empty-row"><td colspan="9">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ============ MODAL / FORM OVERLAY ============ -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modal-title">Add record</h2>
+      <button class="modal-close" id="modal-close">&times;</button>
+    </div>
+    <form id="modal-form"></form>
+    <p class="modal-error" id="modal-error"></p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
