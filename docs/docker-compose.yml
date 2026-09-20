@@ -1,0 +1,63 @@
+version: "3.9"
+
+services:
+
+  # ---------------------------------------------------------------
+  # Database
+  # ---------------------------------------------------------------
+  mysql:
+    image: mysql:8.0
+    container_name: vsfsms-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: staffpass123
+      MYSQL_DATABASE: vsfsms_staff_module
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # auto-run schema.sql (tables + sample rows) on first container start
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pstaffpass123"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ---------------------------------------------------------------
+  # Backend API (Java / Spring Boot)
+  # ---------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+    container_name: vsfsms-backend
+    restart: unless-stopped
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: vsfsms_staff_module
+      DB_USER: root
+      DB_PASSWORD: staffpass123
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  # ---------------------------------------------------------------
+  # Frontend (static admin panel, served + reverse-proxied by nginx)
+  # ---------------------------------------------------------------
+  frontend:
+    image: nginx:alpine
+    container_name: vsfsms-frontend
+    restart: unless-stopped
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./frontend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "8081:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
