@@ -22,7 +22,7 @@
         <th>Vehicle</th>
         <th>Customer</th>
         <th>Date</th>
-        <th>Action</th>
+        <th>Actions</th>
     </tr>
     </thead>
 
@@ -47,9 +47,15 @@
         <td th:text="${sale.saleDateTime}"></td>
 
         <td>
+
             <a th:href="@{/sales/{id}(id=${sale.id})}">
                 View
             </a>
+
+            <a th:href="@{/sales/{id}/edit(id=${sale.id})}">
+                Edit
+            </a>
+
         </td>
 
     </tr>

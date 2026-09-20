@@ -35,10 +35,7 @@ public class FuelSaleService {
                 .orElseThrow(() ->
                         new IllegalArgumentException("Inventory item not found"));
 
-        if (quantity == null || quantity <= 0) {
-            throw new IllegalArgumentException(
-                    "Quantity must be greater than zero");
-        }
+        validateQuantity(quantity);
 
         if (inventoryItem.getAvailableQuantity() < quantity) {
             throw new IllegalArgumentException(
@@ -47,9 +44,8 @@ public class FuelSaleService {
 
         BigDecimal unitPrice = inventoryItem.getUnitPrice();
 
-        BigDecimal totalAmount = unitPrice.multiply(
-                BigDecimal.valueOf(quantity)
-        );
+        BigDecimal totalAmount =
+                unitPrice.multiply(BigDecimal.valueOf(quantity));
 
         FuelSale fuelSale = new FuelSale();
 
@@ -87,7 +83,91 @@ public class FuelSaleService {
                         new IllegalArgumentException("Invoice not found"));
     }
 
+    @Transactional
+    public FuelSale updateSale(Long id,
+                               Long inventoryItemId,
+                               Double quantity,
+                               String vehicleNumber,
+                               String customerName) {
+
+        validateQuantity(quantity);
+
+        FuelSale existingSale = getSaleById(id);
+
+        InventoryItem oldInventoryItem =
+                existingSale.getInventoryItem();
+
+        InventoryItem newInventoryItem = inventoryItemRepository
+                .findById(inventoryItemId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Inventory item not found"));
+
+        double oldQuantity = existingSale.getQuantity();
+
+        if (oldInventoryItem.getId().equals(newInventoryItem.getId())) {
+
+            double availableAfterRestore =
+                    oldInventoryItem.getAvailableQuantity()
+                            + oldQuantity;
+
+            if (availableAfterRestore < quantity) {
+                throw new IllegalArgumentException(
+                        "Insufficient inventory quantity");
+            }
+
+            oldInventoryItem.setAvailableQuantity(
+                    availableAfterRestore - quantity
+            );
+
+            inventoryItemRepository.save(oldInventoryItem);
+
+        } else {
+
+            oldInventoryItem.setAvailableQuantity(
+                    oldInventoryItem.getAvailableQuantity()
+                            + oldQuantity
+            );
+
+            if (newInventoryItem.getAvailableQuantity() < quantity) {
+                throw new IllegalArgumentException(
+                        "Insufficient inventory quantity");
+            }
+
+            newInventoryItem.setAvailableQuantity(
+                    newInventoryItem.getAvailableQuantity()
+                            - quantity
+            );
+
+            inventoryItemRepository.save(oldInventoryItem);
+            inventoryItemRepository.save(newInventoryItem);
+        }
+
+        BigDecimal unitPrice = newInventoryItem.getUnitPrice();
+
+        BigDecimal totalAmount =
+                unitPrice.multiply(BigDecimal.valueOf(quantity));
+
+        existingSale.setInventoryItem(newInventoryItem);
+        existingSale.setQuantity(quantity);
+        existingSale.setUnitPrice(unitPrice);
+        existingSale.setTotalAmount(totalAmount);
+        existingSale.setVehicleNumber(vehicleNumber);
+        existingSale.setCustomerName(customerName);
+
+        return fuelSaleRepository.save(existingSale);
+    }
+
+    private void validateQuantity(Double quantity) {
+
+        if (quantity == null || quantity <= 0) {
+            throw new IllegalArgumentException(
+                    "Quantity must be greater than zero");
+        }
+    }
+
     private String generateInvoiceNumber() {
+
         return "INV-" +
                 UUID.randomUUID()
                         .toString()
