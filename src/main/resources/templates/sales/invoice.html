@@ -1,1 +1,181 @@
-<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org"><head th:replace="~{fragments :: head('Invoice')}"></head><body><nav th:replace="~{fragments :: nav}"></nav><main class="container"><div class="header no-print"><h1>Fuel Sale Invoice</h1><div><button class="btn primary" onclick="window.print()">Print Invoice</button><a class="btn" th:href="@{/sales}">Back</a></div></div><article class="invoice card"><div class="invoice-top"><div><h2>Vehicle Service & Fuel Station Management System</h2><p>Fuel Station Sales Invoice</p></div><div><b th:text="${sale.invoiceNumber}"></b><br><span th:text="${#temporals.format(sale.saleDateTime,'dd MMM yyyy HH:mm')}"></span></div></div><div class="grid"><div><h3>Customer</h3><p>Name: <span th:text="${sale.customerName}"></span><br>Vehicle: <span th:text="${sale.vehicleNumber}"></span></p></div><div><h3>Payment</h3><p>Method: <span th:text="${sale.paymentMethod}"></span><br>Status: <span th:text="${sale.paymentStatus}"></span></p></div></div><table><tr><th>Description</th><th>Quantity</th><th>Unit Price</th><th>Amount</th></tr><tr><td th:text="${sale.fuelItem.name}"></td><td th:text="${sale.quantity+' '+sale.fuelItem.unit}"></td><td th:text="${'LKR '+#numbers.formatDecimal(sale.unitPrice,1,2)}"></td><td th:text="${'LKR '+#numbers.formatDecimal(sale.totalAmount,1,2)}"></td></tr></table><h2 class="total" th:text="${'Total Paid/Recorded: LKR '+#numbers.formatDecimal(sale.totalAmount,1,2)}"></h2><p>Thank you for your purchase.</p></article></main></body></html>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments :: head('Invoice')}"></head>
+
+<body>
+
+<nav th:replace="~{fragments :: nav}"></nav>
+
+<main class="container">
+
+    <div class="header no-print">
+
+        <h1>
+            Fuel Sale Invoice
+        </h1>
+
+        <div>
+
+            <!-- NEW EDIT BUTTON -->
+
+            <a class="btn primary"
+               th:href="@{/sales/{id}/edit(id=${sale.id})}">
+                Edit Sale
+            </a>
+
+            <!-- ORIGINAL PRINT BUTTON -->
+
+            <button class="btn primary"
+                    onclick="window.print()">
+                Print Invoice
+            </button>
+
+            <!-- ORIGINAL BACK BUTTON -->
+
+            <a class="btn"
+               th:href="@{/sales}">
+                Back
+            </a>
+
+        </div>
+
+    </div>
+
+    <article class="invoice card">
+
+        <div class="invoice-top">
+
+            <div>
+
+                <h2>
+                    Vehicle Service & Fuel Station Management System
+                </h2>
+
+                <p>
+                    Fuel Station Sales Invoice
+                </p>
+
+            </div>
+
+            <div>
+
+                <b th:text="${sale.invoiceNumber}">
+                </b>
+
+                <br>
+
+                <span th:text="${#temporals.format(
+                    sale.saleDateTime,
+                    'dd MMM yyyy HH:mm')}">
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="grid">
+
+            <div>
+
+                <h3>
+                    Customer
+                </h3>
+
+                <p>
+
+                    Name:
+
+                    <span th:text="${sale.customerName}">
+                    </span>
+
+                    <br>
+
+                    Vehicle:
+
+                    <span th:text="${sale.vehicleNumber}">
+                    </span>
+
+                </p>
+
+            </div>
+
+            <div>
+
+                <h3>
+                    Payment
+                </h3>
+
+                <p>
+
+                    Method:
+
+                    <span th:text="${sale.paymentMethod}">
+                    </span>
+
+                    <br>
+
+                    Status:
+
+                    <span th:text="${sale.paymentStatus}">
+                    </span>
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <table>
+
+            <tr>
+
+                <th>Description</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Amount</th>
+
+            </tr>
+
+            <tr>
+
+                <td th:text="${sale.fuelItem.name}">
+                </td>
+
+                <td th:text="${sale.quantity+' '+sale.fuelItem.unit}">
+                </td>
+
+                <td th:text="${'LKR '+#numbers.formatDecimal(
+                    sale.unitPrice,
+                    1,
+                    2)}">
+                </td>
+
+                <td th:text="${'LKR '+#numbers.formatDecimal(
+                    sale.totalAmount,
+                    1,
+                    2)}">
+                </td>
+
+            </tr>
+
+        </table>
+
+        <h2 class="total"
+            th:text="${'Total Paid/Recorded: LKR '
+            +#numbers.formatDecimal(
+                sale.totalAmount,
+                1,
+                2)}">
+        </h2>
+
+        <p>
+            Thank you for your purchase.
+        </p>
+
+    </article>
+
+</main>
+
+</body>
+</html>
