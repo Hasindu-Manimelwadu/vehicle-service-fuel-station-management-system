@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 public class DashboardController {
@@ -16,7 +17,10 @@ public class DashboardController {
     public DashboardController(FuelSaleService sales, InventoryItemRepository inventory){this.sales=sales;this.inventory=inventory;}
     @GetMapping({"/","/dashboard"})
     public String dashboard(Model model){
-        List<InventoryItem> low=inventory.findAll().stream().filter(InventoryItem::isLowStock).toList();
+        List<InventoryItem> low = inventory.findAll()
+                .stream()
+                .filter(InventoryItem::isLowStock)
+                .collect(Collectors.toList());
         model.addAttribute("paidRevenue",sales.paidRevenue());
         model.addAttribute("paidCount",sales.paidCount());
         model.addAttribute("paidQuantity",sales.paidQuantity());

@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/reports")
@@ -29,7 +30,7 @@ public class ReportsController {
         BigDecimal quantity=filtered.stream().filter(s->s.getPaymentStatus()==PaymentStatus.PAID).map(FuelSale::getQuantity).reduce(BigDecimal.ZERO,BigDecimal::add);
         long paid=filtered.stream().filter(s->s.getPaymentStatus()==PaymentStatus.PAID).count();
         Map<PaymentMethod,Long> paymentCounts=filtered.stream().collect(Collectors.groupingBy(FuelSale::getPaymentMethod,Collectors.counting()));
-        model.addAttribute("from",from);model.addAttribute("to",to);model.addAttribute("sales",filtered);model.addAttribute("revenue",revenue);model.addAttribute("quantity",quantity);model.addAttribute("paidCount",paid);model.addAttribute("paymentCounts",paymentCounts);model.addAttribute("lowStock",sales.fuels().stream().filter(InventoryItem::isLowStock).toList());
+        model.addAttribute("from",from);model.addAttribute("to",to);model.addAttribute("sales",filtered);model.addAttribute("revenue",revenue);model.addAttribute("quantity",quantity);model.addAttribute("paidCount",paid);model.addAttribute("paymentCounts",paymentCounts);model.addAttribute("lowStock",sales.fuels().stream().filter(InventoryItem::isLowStock).collect(Collectors.toList()));
         return "reports/index";
     }
 }
