@@ -10,6 +10,9 @@ import ServiceRecordForm from "./serviceRecords/ServiceRecordForm";
 import ServiceRecordDetails from "./serviceRecords/ServiceRecordDetails";
 import TechnicianJobs from "./serviceRecords/TechnicianJobs";
 import TechnicianJobDetails from "./serviceRecords/TechnicianJobDetails";
+import BookingPage from "./pages/BookingPage";
+import BookingConfirmationPage from "./pages/BookingConfirmationPage";
+import MyBookingsPage from "./pages/MyBookingsPage";
 
 function App() {
   return (
@@ -43,7 +46,32 @@ function App() {
         <Route path="/technician/jobs/:id" element={
           <ProtectedRoute roles={["TECHNICIAN"]}><TechnicianJobDetails /></ProtectedRoute>
         } />
+<Route
+  path="/book"
+  element={
+    <ProtectedRoute>
+      <BookingPage />
+    </ProtectedRoute>
+  }
+/>
 
+<Route
+  path="/confirmation"
+  element={
+    <ProtectedRoute>
+      <BookingConfirmationPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/my-bookings"
+  element={
+    <ProtectedRoute>
+      <MyBookingsPage />
+    </ProtectedRoute>
+  }
+/>
         <Route path="/" element={<Navigate to={localStorage.getItem("accessToken") ? "/dashboard" : "/login"} replace />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
