@@ -1,63 +1,85 @@
-package com.vehicleservice.customervehicle.entity;
+package com.sliit.vehiclemgmt.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Customer Entity representing registered users (customers, staff, admins).
+ */
 @Entity
-@Table(name = "customers")
+@Table(name = "customers", indexes = {
+        @Index(name = "idx_customers_email", columnList = "email"),
+        @Index(name = "idx_customers_username", columnList = "username")
+})
 public class Customer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "customer_id")
+    private Long customerId;
 
-    @NotBlank(message = "Full name is required")
+    @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Email must be valid")
-    @Column(unique = true)
+    @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
 
-    @NotBlank(message = "Phone number is required")
-    private String phoneNumber;
+    @Column(name = "phone", nullable = false, length = 20)
+    private String phone;
 
+    @Column(name = "address", nullable = false, length = 255)
     private String address;
 
-    // NOTE: In production this should be a hashed password (e.g. BCrypt),
-    // not stored in plain text. Kept simple here since Authentication is a
-    // separate shared module owned by the whole team.
-    @NotBlank(message = "Password is required")
-    private String password;
+    @Column(name = "nic_number", nullable = false, length = 20)
+    private String nicNumber;
 
-    private LocalDateTime registeredAt = LocalDateTime.now();
+    @Column(name = "username", nullable = false, unique = true, length = 50)
+    private String username;
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Column(name = "password_hash", nullable = false, length = 255)
+    private String passwordHash;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false, length = 20)
+    private Role role = Role.CUSTOMER;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Vehicle> vehicles = new ArrayList<>();
 
     public Customer() {
     }
 
-    public Customer(String fullName, String email, String phoneNumber, String address, String password) {
+    public Customer(String fullName, String email, String phone, String address, String nicNumber, String username, String passwordHash, Role role) {
         this.fullName = fullName;
         this.email = email;
-        this.phoneNumber = phoneNumber;
+        this.phone = phone;
         this.address = address;
-        this.password = password;
+        this.nicNumber = nicNumber;
+        this.username = username;
+        this.passwordHash = passwordHash;
+        this.role = role != null ? role : Role.CUSTOMER;
     }
 
-    // Getters and setters
-
-    public Long getId() {
-        return id;
+    // Getters and Setters
+    public Long getCustomerId() {
+        return customerId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setCustomerId(Long customerId) {
+        this.customerId = customerId;
     }
 
     public String getFullName() {
@@ -76,12 +98,12 @@ public class Customer {
         this.email = email;
     }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getAddress() {
@@ -92,20 +114,52 @@ public class Customer {
         this.address = address;
     }
 
-    public String getPassword() {
-        return password;
+    public String getNicNumber() {
+        return nicNumber;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setNicNumber(String nicNumber) {
+        this.nicNumber = nicNumber;
     }
 
-    public LocalDateTime getRegisteredAt() {
-        return registeredAt;
+    public String getUsername() {
+        return username;
     }
 
-    public void setRegisteredAt(LocalDateTime registeredAt) {
-        this.registeredAt = registeredAt;
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public List<Vehicle> getVehicles() {

@@ -1,64 +1,101 @@
-package com.vehicleservice.customervehicle.entity;
+package com.sliit.vehiclemgmt.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Vehicle Entity representing vehicles registered to customers.
+ */
 @Entity
-@Table(name = "vehicles")
+@Table(name = "vehicles", indexes = {
+        @Index(name = "idx_vehicles_plate", columnList = "plate_number"),
+        @Index(name = "idx_vehicles_customer_id", columnList = "customer_id")
+})
 public class Vehicle {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "vehicle_id")
+    private Long vehicleId;
 
-    @NotBlank(message = "License plate number is required")
-    @Column(unique = true)
-    private String licensePlateNumber;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
 
-    @NotBlank(message = "Make is required")
-    private String make; // e.g. Toyota
+    @Column(name = "plate_number", nullable = false, unique = true, length = 20)
+    private String plateNumber;
 
-    @NotBlank(message = "Model is required")
-    private String model; // e.g. Aqua
+    @Column(name = "make", nullable = false, length = 50)
+    private String make;
 
-    private int year;
+    @Column(name = "model", nullable = false, length = 50)
+    private String model;
 
+    @Column(name = "year", nullable = false)
+    private Integer year;
+
+    @Column(name = "vehicle_type", nullable = false, length = 30)
+    private String vehicleType;
+
+    @Column(name = "fuel_type", nullable = false, length = 30)
+    private String fuelType;
+
+    @Column(name = "color", nullable = false, length = 30)
     private String color;
 
-    @ManyToOne
-    @JoinColumn(name = "customer_id", nullable = false)
-    @JsonIgnoreProperties({"vehicles", "password"}) // avoid infinite loop + hide password when serialized
-    private Customer customer;
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<ServiceRecord> serviceRecords = new ArrayList<>();
 
     public Vehicle() {
     }
 
-    public Vehicle(String licensePlateNumber, String make, String model, int year, String color, Customer customer) {
-        this.licensePlateNumber = licensePlateNumber;
+    public Vehicle(Customer customer, String plateNumber, String make, String model, Integer year, String vehicleType, String fuelType, String color) {
+        this.customer = customer;
+        this.plateNumber = plateNumber;
         this.make = make;
         this.model = model;
         this.year = year;
+        this.vehicleType = vehicleType;
+        this.fuelType = fuelType;
         this.color = color;
+    }
+
+    // Getters and Setters
+    public Long getVehicleId() {
+        return vehicleId;
+    }
+
+    public void setVehicleId(Long vehicleId) {
+        this.vehicleId = vehicleId;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
         this.customer = customer;
     }
 
-    // Getters and setters
-
-    public Long getId() {
-        return id;
+    public String getPlateNumber() {
+        return plateNumber;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getLicensePlateNumber() {
-        return licensePlateNumber;
-    }
-
-    public void setLicensePlateNumber(String licensePlateNumber) {
-        this.licensePlateNumber = licensePlateNumber;
+    public void setPlateNumber(String plateNumber) {
+        this.plateNumber = plateNumber;
     }
 
     public String getMake() {
@@ -77,12 +114,28 @@ public class Vehicle {
         this.model = model;
     }
 
-    public int getYear() {
+    public Integer getYear() {
         return year;
     }
 
-    public void setYear(int year) {
+    public void setYear(Integer year) {
         this.year = year;
+    }
+
+    public String getVehicleType() {
+        return vehicleType;
+    }
+
+    public void setVehicleType(String vehicleType) {
+        this.vehicleType = vehicleType;
+    }
+
+    public String getFuelType() {
+        return fuelType;
+    }
+
+    public void setFuelType(String fuelType) {
+        this.fuelType = fuelType;
     }
 
     public String getColor() {
@@ -93,11 +146,27 @@ public class Vehicle {
         this.color = color;
     }
 
-    public Customer getCustomer() {
-        return customer;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public List<ServiceRecord> getServiceRecords() {
+        return serviceRecords;
+    }
+
+    public void setServiceRecords(List<ServiceRecord> serviceRecords) {
+        this.serviceRecords = serviceRecords;
     }
 }
