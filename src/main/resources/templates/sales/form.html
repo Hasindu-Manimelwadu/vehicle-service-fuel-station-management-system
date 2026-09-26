@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments :: head('Fuel Sale')}"></head>
+
+<body>
+
+<aside th:replace="~{fragments :: sidebar}"></aside>
+
+<header th:replace="~{fragments :: topbar}"></header>
+
+<main class="app-main">
+
+    <!-- PAGE KICKER -->
+    <div class="page-kicker">
+        ← &nbsp; Fuel Sales
+    </div>
+
+    <!-- PAGE HEADING -->
+    <div class="page-heading">
+
+        <div>
+
+            <h1 th:text="${sale.id == null ? 'Create New Sale' : 'Edit Sale'}">
+                Create New Sale
+            </h1>
+
+            <p th:text="${sale.id == null
+                    ? 'Record a new fuel sale quickly and accurately.'
+                    : 'Update the selected fuel sale information.'}">
+                Record a new fuel sale quickly and accurately.
+            </p>
+
+        </div>
+
+        <a class="btn outline"
+           th:href="@{/sales}">
+            ☷ &nbsp; View All Sales
+        </a>
+
+    </div>
+
+
+    <!-- ERROR MESSAGE -->
+    <div th:if="${saleError}"
+         class="alert danger"
+         th:text="${saleError}">
+    </div>
+
+
+    <div class="sale-layout">
+
+        <!-- ========================= -->
+        <!-- SALE FORM -->
+        <!-- ========================= -->
+
+        <section class="panel sale-panel">
+
+            <div class="panel-title">
+
+                <span class="round-icon">
+                    ⛽
+                </span>
+
+                <div>
+
+                    <h2 th:text="${sale.id == null
+                            ? 'Sale Details'
+                            : 'Edit Sale Details'}">
+                        Sale Details
+                    </h2>
+
+                    <p th:text="${sale.id == null
+                            ? 'Enter the sale information below'
+                            : 'Update the sale information below'}">
+                        Enter the sale information below
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!--
+                CREATE:
+                POST /sales/save
+
+                UPDATE:
+                POST /sales/{id}/update
+            -->
+
+            <form id="saleForm"
+                  class="sale-form"
+                  th:action="${sale.id == null}
+                        ? @{/sales/save}
+                        : @{/sales/{id}/update(id=${sale.id})}"
+                  th:object="${sale}"
+                  method="post">
+
+
+                <!-- EXISTING SALE ID -->
+                <input th:if="${sale.id != null}"
+                       type="hidden"
+                       th:field="*{id}">
+
+
+                <!-- ========================= -->
+                <!-- FUEL TYPE -->
+                <!-- ========================= -->
+
+                <label>
+
+                    Fuel Type
+
+                    <select id="fuelItem"
+                            th:field="*{fuelItem}"
+                            required>
+
+                        <option value="">
+                            Select fuel type
+                        </option>
+
+                        <option th:each="f : ${fuelItems}"
+                                th:value="${f.id}"
+                                th:text="${f.name}"
+                                th:attr="data-price=${f.unitPrice},
+                                         data-unit=${f.unit}">
+                        </option>
+
+                    </select>
+
+                </label>
+
+
+                <!-- ========================= -->
+                <!-- QUANTITY -->
+                <!-- ========================= -->
+
+                <label>
+
+                    Quantity (L)
+
+                    <input id="quantity"
+                           type="number"
+                           min="0.01"
+                           step="0.01"
+                           th:field="*{quantity}"
+                           placeholder="Enter quantity"
+                           required>
+
+                </label>
+
+
+                <!-- ========================= -->
+                <!-- UNIT PRICE -->
+                <!-- ========================= -->
+
+                <label>
+
+                    Unit Price (Rs.)
+
+                    <input id="unitPrice"
+                           type="text"
+                           value="0.00"
+                           readonly>
+
+                </label>
+
+
+                <!-- ========================= -->
+                <!-- VEHICLE NUMBER -->
+                <!-- ========================= -->
+
+                <label>
+
+                    Vehicle Number
+
+                    <input type="text"
+                           th:field="*{vehicleNumber}"
+                           placeholder="e.g. ABC-1234">
+
+                </label>
+
+
+                <!-- ========================= -->
+                <!-- CUSTOMER NAME -->
+                <!-- ========================= -->
+
+                <label class="wide">
+
+                    Customer Name
+
+                    <input type="text"
+                           th:field="*{customerName}"
+                           placeholder="Enter customer name">
+
+                </label>
+
+
+                <!-- ========================= -->
+                <!-- PAYMENT METHOD -->
+                <!-- ========================= -->
+
+                <label>
+
+                    Payment Method
+
+                    <select th:field="*{paymentMethod}"
+                            required>
+
+                        <option th:each="p : ${paymentMethods}"
+                                th:value="${p}"
+                                th:text="${p}">
+                        </option>
+
+                    </select>
+
+                </label>
+
+
+                <!-- ========================= -->
+                <!-- PAYMENT STATUS -->
+                <!-- ========================= -->
+
+                <label>
+
+                    Payment Status
+
+                    <select th:field="*{paymentStatus}"
+                            required>
+
+                        <option th:each="p : ${paymentStatuses}"
+                                th:value="${p}"
+                                th:text="${p}">
+                        </option>
+
+                    </select>
+
+                </label>
+
+
+                <!-- ========================= -->
+                <!-- FORM BUTTONS -->
+                <!-- ========================= -->
+
+                <div class="form-actions wide">
+
+
+                    <!-- RESET - CREATE MODE ONLY -->
+
+                    <button th:if="${sale.id == null}"
+                            class="btn outline"
+                            type="reset">
+
+                        Reset
+
+                    </button>
+
+
+                    <!-- CANCEL - EDIT MODE ONLY -->
+
+                    <a th:if="${sale.id != null}"
+                       class="btn outline"
+                       th:href="@{/sales}">
+
+                        Cancel
+
+                    </a>
+
+
+                    <!-- CREATE BUTTON -->
+
+                    <button th:if="${sale.id == null}"
+                            class="btn primary"
+                            type="submit">
+
+                        ▣ &nbsp; Save Sale
+
+                    </button>
+
+
+                    <!-- UPDATE BUTTON -->
+
+                    <button th:if="${sale.id != null}"
+                            class="btn primary"
+                            type="submit">
+
+                        ✓ &nbsp; Update Sale
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+
+        <!-- ========================= -->
+        <!-- SALE SUMMARY -->
+        <!-- ========================= -->
+
+        <aside class="panel summary-panel">
+
+            <div class="panel-title">
+
+                <span class="round-icon">
+                    🛒
+                </span>
+
+                <div>
+
+                    <h2>
+                        Sale Summary
+                    </h2>
+
+                    <p>
+                        Details will be updated automatically
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- FUEL TYPE -->
+
+            <div class="summary-row">
+
+                <span>
+                    Fuel Type
+                </span>
+
+                <b id="summaryFuel">
+                    -
+                </b>
+
+            </div>
+
+
+            <!-- QUANTITY -->
+
+            <div class="summary-row">
+
+                <span>
+                    Quantity
+                </span>
+
+                <b id="summaryQty">
+                    -
+                </b>
+
+            </div>
+
+
+            <!-- UNIT PRICE -->
+
+            <div class="summary-row">
+
+                <span>
+                    Unit Price
+                </span>
+
+                <b id="summaryPrice">
+                    Rs. 0.00
+                </b>
+
+            </div>
+
+
+            <!-- TOTAL -->
+
+            <div class="summary-total">
+
+                <span>
+                    Total Amount
+                </span>
+
+                <b id="summaryTotal">
+                    Rs. 0.00
+                </b>
+
+            </div>
+
+        </aside>
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- INFORMATION NOTE -->
+    <!-- ========================= -->
+
+    <div class="info-note"
+         th:if="${sale.id == null}">
+
+        ⓘ &nbsp;
+        Note: Inventory will be automatically updated
+        after saving the sale.
+
+    </div>
+
+
+    <div class="info-note"
+         th:if="${sale.id != null}">
+
+        ⓘ &nbsp;
+        Note: Inventory will be automatically adjusted
+        after updating the sale.
+
+    </div>
+
+</main>
+
+
+<!-- ============================= -->
+<!-- JAVASCRIPT -->
+<!-- ============================= -->
+
+<script>
+
+    const fuel =
+        document.getElementById('fuelItem');
+
+    const qty =
+        document.getElementById('quantity');
+
+    const price =
+        document.getElementById('unitPrice');
+
+
+    const summaryFuel =
+        document.getElementById('summaryFuel');
+
+    const summaryQty =
+        document.getElementById('summaryQty');
+
+    const summaryPrice =
+        document.getElementById('summaryPrice');
+
+    const summaryTotal =
+        document.getElementById('summaryTotal');
+
+
+    /*
+     * Update Sale Summary
+     */
+    function refreshSummary() {
+
+        if (!fuel || !qty) {
+            return;
+        }
+
+        const selectedOption =
+            fuel.options[fuel.selectedIndex];
+
+
+        const unitPrice =
+            parseFloat(
+                selectedOption?.dataset?.price || 0
+            );
+
+
+        const quantity =
+            parseFloat(
+                qty.value || 0
+            );
+
+
+        const unit =
+            selectedOption?.dataset?.unit || 'L';
+
+
+        /*
+         * UNIT PRICE INPUT
+         */
+        price.value =
+            unitPrice.toFixed(2);
+
+
+        /*
+         * FUEL NAME
+         */
+        if (fuel.value) {
+
+            summaryFuel.textContent =
+                selectedOption.text;
+
+        } else {
+
+            summaryFuel.textContent =
+                '-';
+        }
+
+
+        /*
+         * QUANTITY
+         */
+        if (quantity > 0) {
+
+            summaryQty.textContent =
+                quantity.toFixed(2)
+                + ' '
+                + unit;
+
+        } else {
+
+            summaryQty.textContent =
+                '-';
+        }
+
+
+        /*
+         * UNIT PRICE
+         */
+        summaryPrice.textContent =
+            'Rs. '
+            + unitPrice.toFixed(2);
+
+
+        /*
+         * TOTAL AMOUNT
+         */
+        const total =
+            unitPrice * quantity;
+
+
+        summaryTotal.textContent =
+            'Rs. '
+            + total.toFixed(2);
+
+    }
+
+
+    /*
+     * Fuel type changed
+     */
+    fuel.addEventListener(
+        'change',
+        refreshSummary
+    );
+
+
+    /*
+     * Quantity changed
+     */
+    qty.addEventListener(
+        'input',
+        refreshSummary
+    );
+
+
+    /*
+     * Reset button
+     */
+    document
+        .getElementById('saleForm')
+        .addEventListener(
+            'reset',
+            function () {
+
+                setTimeout(
+                    refreshSummary,
+                    0
+                );
+
+            }
+        );
+
+
+    /*
+     * Important for Edit mode.
+     *
+     * When /sales/{id}/edit is opened,
+     * Thymeleaf automatically selects
+     * the existing fuel and quantity.
+     *
+     * This immediately calculates the
+     * existing unit price and total.
+     */
+    refreshSummary();
+
+</script>
+
+</body>
+
+</html>

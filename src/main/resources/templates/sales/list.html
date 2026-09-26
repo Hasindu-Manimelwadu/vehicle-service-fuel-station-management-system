@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments :: head('Fuel Sales')}"></head>
+
+<body>
+
+<nav th:replace="~{fragments :: nav}"></nav>
+
+<main class="container">
+
+    <div class="header">
+
+        <div>
+
+            <h1>
+                Fuel Sales & Payment History
+            </h1>
+
+            <p>
+                Record, view, edit and print fuel sale invoices.
+            </p>
+
+        </div>
+
+        <a class="btn primary"
+           th:href="@{/sales/new}">
+            + New Sale
+        </a>
+
+    </div>
+
+    <div th:replace="~{fragments :: messages}"></div>
+
+    <div class="card table-wrap">
+
+        <table>
+
+            <tr>
+
+                <th>Invoice</th>
+                <th>Date</th>
+                <th>Fuel</th>
+                <th>Qty</th>
+                <th>Customer / Vehicle</th>
+                <th>Payment</th>
+                <th>Total</th>
+                <th>Action</th>
+
+            </tr>
+
+            <tr th:each="s:${sales}">
+
+                <td>
+
+                    <a th:href="@{/sales/{id}/invoice(id=${s.id})}"
+                       th:text="${s.invoiceNumber}">
+                    </a>
+
+                </td>
+
+                <td th:text="${#temporals.format(
+                    s.saleDateTime,
+                    'dd MMM yyyy HH:mm')}">
+                </td>
+
+                <td th:text="${s.fuelItem.name}">
+                </td>
+
+                <td th:text="${s.quantity+' '+s.fuelItem.unit}">
+                </td>
+
+                <td th:text="${s.customerName+' / '+s.vehicleNumber}">
+                </td>
+
+                <td th:text="${s.paymentMethod+' / '+s.paymentStatus}">
+                </td>
+
+                <td th:text="${'LKR '+#numbers.formatDecimal(
+                    s.totalAmount,
+                    1,
+                    2)}">
+                </td>
+
+                <td>
+
+                    <!-- ORIGINAL INVOICE BUTTON -->
+
+                    <a class="btn small"
+                       th:href="@{/sales/{id}/invoice(id=${s.id})}">
+                        Invoice
+                    </a>
+
+                    <!-- NEW EDIT BUTTON -->
+
+                    <a class="btn small primary"
+                       th:href="@{/sales/{id}/edit(id=${s.id})}">
+                        Edit
+                    </a>
+
+                    <!-- ORIGINAL DELETE -->
+
+                    <form class="inline"
+                          th:action="@{/sales/{id}/delete(id=${s.id})}"
+                          method="post">
+
+                        <button class="btn small danger"
+                                type="submit">
+                            Delete
+                        </button>
+
+                    </form>
+
+                </td>
+
+            </tr>
+
+        </table>
+
+    </div>
+
+</main>
+
+</body>
+</html>
