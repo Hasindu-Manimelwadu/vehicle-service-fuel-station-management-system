@@ -33,6 +33,7 @@ services:
     container_name: vsfsms-backend
     restart: unless-stopped
     environment:
+      SPRING_PROFILES_ACTIVE: mysql   # use MySQL here; plain IntelliJ runs use H2
       DB_HOST: mysql
       DB_PORT: 3306
       DB_NAME: vsfsms_staff_module
